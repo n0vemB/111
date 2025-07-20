@@ -1,27 +1,33 @@
 <view class="container">
-  <image class="bg-image" src="/images/bg.jpg" mode="aspectFill"></image>
-  
-  <view class="content">
-    <text class="title">100元体验金</text>
-    <text class="subtitle">限时活动，仅限新用户\n完成信息填写即可领取</text>
-    
-    <button class="claim-btn" bindtap="handleClaim" open-type="getUserProfile">
-      立即领取
-    </button>
+  <view class="header">
+    <text class="title">欢迎参与活动</text>
+    <text class="subtitle">点击下方按钮领取您的专属福利</text>
   </view>
-  
+
+  <view class="card">
+    <view class="welcome-content">
+      <view class="gift-icon">🎁</view>
+      <text class="gift-title">专属福利等你来领</text>
+      <text class="gift-desc">限时活动，机会难得\n快来领取属于你的专属福利吧！</text>
+      
+      <button class="claim-btn" bindtap="claimGift">
+        领取专属福利
+      </button>
+    </view>
+  </view>
+
   <view class="features">
     <view class="feature-item">
-      <text>🎁</text>
-      <text>专属福利</text>
+      <text class="feature-icon">⚡</text>
+      <text>快速领取</text>
     </view>
     <view class="feature-item">
-      <text>⚡</text>
-      <text>即时到账</text>
-    </view>
-    <view class="feature-item">
-      <text>🔒</text>
+      <text class="feature-icon">🔒</text>
       <text>信息安全</text>
+    </view>
+    <view class="feature-item">
+      <text class="feature-icon">🎯</text>
+      <text>专属定制</text>
     </view>
   </view>
 </view>

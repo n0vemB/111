@@ -47,22 +47,38 @@ Page({
       return;
     }
 
+    // 获取 openid
+    const openid = wx.getStorageSync('openid');
+    if (!openid) {
+      wx.showToast({
+        title: '用户信息异常，请重新进入',
+        icon: 'none'
+      });
+      return;
+    }
+
     // 显示加载状态
     wx.showLoading({
       title: '提交中...'
     });
 
+    const submitData = {
+      ...formData,
+      userInfo: this.data.userInfo,
+      openid: openid,
+      createTime: new Date().toISOString()
+    };
+
+    console.log('提交数据:', submitData);
+
     wx.request({
       url: 'https://bk-lilac.vercel.app/api/submit',
       method: 'POST',
-      data: {
-        ...formData,
-        userInfo: this.data.userInfo,
-        openid: wx.getStorageSync('openid') || 'test-openid-' + Date.now(),
-        createTime: new Date().toISOString()
-      },
+      data: submitData,
       success: (res) => {
         wx.hideLoading();
+        console.log('提交结果:', res);
+        
         if (res.data.success) {
           wx.redirectTo({
             url: '/pages/success/success'

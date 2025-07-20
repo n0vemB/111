@@ -14,30 +14,22 @@ export default function handler(req, res) {
   const { method } = req;
   const url = req.query.url || req.url;
   
-  console.log('API Request:', { method, url, usersCount: global.users.length });
+  console.log('API Request:', { method, url, body: req.body, usersCount: global.users.length });
 
   try {
-    // 根路径
-    if (method === 'GET' && (url === '/api' || url === '/')) {
-      return res.json({ 
-        message: 'API is working', 
-        timestamp: new Date().toISOString(),
-        users: global.users.length 
-      });
-    }
-
-    // 管理员查看用户
-    if (method === 'GET' && url === '/api/admin/users') {
-      return res.json({ users: global.users });
-    }
-
     // 检查用户是否存在
     if (method === 'POST' && url === '/api/check-user') {
       const { openid } = req.body || {};
+      console.log('检查用户 openid:', openid);
+      
       if (!openid) {
         return res.status(400).json({ error: '缺少 openid 参数' });
       }
+      
       const exists = global.users.some(user => user.openid === openid);
+      console.log('用户是否存在:', exists);
+      console.log('当前用户列表:', global.users.map(u => ({ openid: u.openid, phone: u.phone })));
+      
       return res.json({ exists });
     }
 
@@ -45,6 +37,8 @@ export default function handler(req, res) {
     if (method === 'POST' && url === '/api/submit') {
       const userData = req.body || {};
       const { openid, phone, referrer, dingName } = userData;
+      
+      console.log('提交用户数据:', userData);
       
       // 验证必填字段
       if (!openid || !phone || !referrer || !dingName) {
@@ -81,17 +75,28 @@ export default function handler(req, res) {
         });
       }
       
-      global.users.push({
+      // 添加用户
+      const newUser = {
         ...userData,
         id: global.users.length + 1,
         submitTime: new Date().toISOString()
-      });
+      };
+      
+      global.users.push(newUser);
+      console.log('用户添加成功:', newUser);
+      console.log('当前用户总数:', global.users.length);
+      
       return res.json({ success: true });
+    }
+
+    // 管理员查看用户
+    if (method === 'GET' && url === '/api/admin/users') {
+      return res.json({ users: global.users });
     }
 
     // 删除用户
     if (method === 'DELETE' && url.startsWith('/api/admin/user/')) {
-      const openid = url.split('/').pop();
+      const openid = decodeURIComponent(url.split('/').pop());
       const userIndex = global.users.findIndex(user => user.openid === openid);
       
       if (userIndex === -1) {
@@ -102,73 +107,28 @@ export default function handler(req, res) {
       }
       
       const deletedUser = global.users.splice(userIndex, 1)[0];
+      console.log('删除用户:', deletedUser);
+      
       return res.json({ 
         success: true, 
         message: '用户已删除'
       });
     }
 
-    // 管理员页面
-    if (method === 'GET' && url === '/api/admin') {
-      return res.send(`
-        <!DOCTYPE html>
-        <html>
-        <head>
-            <title>管理后台</title>
-            <meta charset="utf-8">
-            <style>
-                body { font-family: Arial, sans-serif; margin: 20px; }
-                .user { border: 1px solid #ddd; margin: 10px 0; padding: 10px; }
-                button { background: #ff4444; color: white; border: none; padding: 5px 10px; cursor: pointer; }
-            </style>
-        </head>
-        <body>
-            <h1>用户管理后台</h1>
-            <div id="users"></div>
-            <script>
-                function loadUsers() {
-                    fetch('/api/admin/users')
-                        .then(res => res.json())
-                        .then(data => {
-                            const usersDiv = document.getElementById('users');
-                            if (data.users.length === 0) {
-                                usersDiv.innerHTML = '<p>暂无用户数据</p>';
-                                return;
-                            }
-                            usersDiv.innerHTML = data.users.map(user => \`
-                                <div class="user">
-                                    <h3>\${user.userInfo?.nickName || '未知用户'}</h3>
-                                    <p>推荐人: \${user.referrer || '未知'}</p>
-                                    <p>钉钉名: \${user.dingName || '未知'}</p>
-                                    <p>手机: \${user.phone || '未知'}</p>
-                                    <p>提交时间: \${user.submitTime || '未知'}</p>
-                                    <button onclick="deleteUser('\${user.openid}')">删除</button>
-                                </div>
-                            \`).join('');
-                        });
-                }
-                
-                function deleteUser(openid) {
-                    if (confirm('确定删除此用户？')) {
-                        fetch('/api/admin/user/' + openid, { method: 'DELETE' })
-                            .then(() => loadUsers());
-                    }
-                }
-                
-                loadUsers();
-                setInterval(loadUsers, 5000);
-            </script>
-        </body>
-        </html>
-      `);
+    // 根路径
+    if (method === 'GET' && (url === '/api' || url === '/')) {
+      return res.json({ 
+        message: 'API is working', 
+        timestamp: new Date().toISOString(),
+        users: global.users.length 
+      });
     }
 
     // 404
     return res.status(404).json({ 
       error: 'Not Found', 
       path: url,
-      method: method,
-      debug: 'Available endpoints: /api, /api/admin/users, /api/check-user, /api/submit, /api/admin'
+      method: method
     });
 
   } catch (error) {
