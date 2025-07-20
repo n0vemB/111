@@ -157,17 +157,6 @@ export default function handler(req, res) {
             color: #2c3e50;
             font-size: 14px;
         }
-    </style>
-</head>
-<body>
-    <div class="container">
-        <div class="header">
-            <h1>🎯 用户数据管理中心</h1>
-            <p>实时查看用户提交的信息数据</p>
-        </div>
-        
-        <div class="stats">
-            <div class="stat-card">
                 <div class="stat-number" id="totalUsers">0</div>
                 <div class="stat-label">总用户数</div>
             </div>
@@ -199,6 +188,7 @@ export default function handler(req, res) {
                         <th>钉钉名称</th>
                         <th>手机号</th>
                         <th>提交时间</th>
+                        <th>操作</th>
                     </tr>
                 </thead>
                 <tbody id="userTableBody">
@@ -208,7 +198,8 @@ export default function handler(req, res) {
     </div>
 
     <script>
-        let allUsers = [];
+        let allUsers = [];</th>
+                        <th>操作
         
         window.onload = function() {
             loadUsers();
@@ -264,9 +255,38 @@ export default function handler(req, res) {
                     <td>\${user.dingName || '-'}</td>
                     <td>\${user.phone || '-'}</td>
                     <td>\${submitTime.toLocaleString('zh-CN')}</td>
+                    <td>
+                        <button class="btn btn-danger" onclick="deleteUser('\${user.openid}', '\${user.userInfo?.nickName || '未知'}')">
+                            删除
+                        </button>
+                    </td>
                 \`;
                 tbody.appendChild(row);
             });
+        }
+        
+        async function deleteUser(openid, nickName) {
+            if (!confirm(\`确定要删除用户 "\${nickName}" 吗？\`)) {
+                return;
+            }
+            
+            try {
+                const response = await fetch(\`/api/admin/user/\${encodeURIComponent(openid)}\`, {
+                    method: 'DELETE'
+                });
+                
+                const result = await response.json();
+                
+                if (result.success) {
+                    alert('删除成功！');
+                    loadUsers(); // 重新加载数据
+                } else {
+                    alert('删除失败：' + result.message);
+                }
+            } catch (error) {
+                console.error('删除失败:', error);
+                alert('删除失败，请重试');
+            }
         }
     </script>
 </body>
