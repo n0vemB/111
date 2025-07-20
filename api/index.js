@@ -19,7 +19,100 @@ export default function handler(req, res) {
   try {
     // 管理员页面
     if (method === 'GET' && (url === '/admin' || url === '/api/admin')) {
-      return res.redirect('/public/admin.html');
+      const adminHTML = `<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>用户管理后台</title>
+    <style>
+        body { font-family: Arial, sans-serif; padding: 20px; }
+        .header { text-align: center; margin-bottom: 30px; }
+        .stats { display: flex; gap: 20px; margin-bottom: 20px; }
+        .stat-card { background: #f5f5f5; padding: 20px; border-radius: 8px; text-align: center; }
+        .btn { padding: 10px 20px; background: #007bff; color: white; border: none; border-radius: 4px; cursor: pointer; }
+        table { width: 100%; border-collapse: collapse; }
+        th, td { padding: 12px; text-align: left; border-bottom: 1px solid #ddd; }
+        th { background-color: #f2f2f2; }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>🎯 用户数据管理中心</h1>
+        <p>实时查看用户提交的信息数据</p>
+    </div>
+    
+    <div class="stats">
+        <div class="stat-card">
+            <div id="totalUsers">0</div>
+            <div>总用户数</div>
+        </div>
+        <div class="stat-card">
+            <div id="todayUsers">0</div>
+            <div>今日新增</div>
+        </div>
+    </div>
+    
+    <button class="btn" onclick="loadUsers()">🔄 刷新数据</button>
+    
+    <div id="loading">正在加载数据...</div>
+    <table id="userTable" style="display: none;">
+        <thead>
+            <tr>
+                <th>ID</th>
+                <th>微信昵称</th>
+                <th>介绍人</th>
+                <th>钉钉名称</th>
+                <th>手机号</th>
+                <th>提交时间</th>
+            </tr>
+        </thead>
+        <tbody id="userTableBody"></tbody>
+    </table>
+
+    <script>
+        async function loadUsers() {
+            try {
+                const response = await fetch('/api/admin/users');
+                const data = await response.json();
+                const users = data.users || [];
+                
+                document.getElementById('totalUsers').textContent = users.length;
+                document.getElementById('todayUsers').textContent = users.filter(u => 
+                    new Date(u.submitTime).toDateString() === new Date().toDateString()
+                ).length;
+                
+                const tbody = document.getElementById('userTableBody');
+                tbody.innerHTML = '';
+                
+                users.forEach((user, index) => {
+                    const row = document.createElement('tr');
+                    row.innerHTML = \`
+                        <td>\${user.id || index + 1}</td>
+                        <td>\${user.userInfo?.nickName || '未知'}</td>
+                        <td>\${user.referrer || '-'}</td>
+                        <td>\${user.dingName || '-'}</td>
+                        <td>\${user.phone || '-'}</td>
+                        <td>\${new Date(user.submitTime).toLocaleString('zh-CN')}</td>
+                    \`;
+                    tbody.appendChild(row);
+                });
+                
+                document.getElementById('loading').style.display = 'none';
+                document.getElementById('userTable').style.display = 'table';
+            } catch (error) {
+                console.error('加载失败:', error);
+                document.getElementById('loading').innerHTML = '❌ 加载失败，请刷新重试';
+            }
+        }
+        
+        window.onload = loadUsers;
+    </script>
+</body>
+</html>`;
+  
+      res.setHeader('Content-Type', 'text/html');
+      return res.send(adminHTML);
     }
 
     // 检查用户是否存在
