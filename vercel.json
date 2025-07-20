@@ -2,20 +2,24 @@
   "version": 2,
   "rewrites": [
     {
+      "source": "/admin",
+      "destination": "/api/index?url=/api/admin"
+    },
+    {
       "source": "/api/admin/users",
-      "destination": "/api/users"
+      "destination": "/api/index?url=/api/admin/users"
     },
     {
       "source": "/api/check-user",
-      "destination": "/api/users"
+      "destination": "/api/index?url=/api/check-user"
     },
     {
       "source": "/api/submit",
-      "destination": "/api/users"
+      "destination": "/api/index?url=/api/submit"
     },
     {
-      "source": "/api",
-      "destination": "/api/hello"
+      "source": "/api/admin/user/(.*)",
+      "destination": "/api/index?url=/api/admin/user/$1"
     }
   ]
 }
