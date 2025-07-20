@@ -30,8 +30,8 @@ Page({
           // 存储用户信息到本地
           wx.setStorageSync('userInfo', res.userInfo);
           
-          // 获取手机号
-          this.getPhoneNumber(res.userInfo);
+          // 直接进入检查用户流程
+          this.checkUserExists(res.userInfo);
         },
         fail: (err) => {
           console.error('获取用户信息失败:', err);
@@ -42,8 +42,8 @@ Page({
         }
       });
     } else {
-      // 使用旧的授权方式
-      this.getPhoneNumber();
+      // 使用旧的授权方式，直接进入检查流程
+      this.checkUserExists();
     }
   },
 
@@ -72,23 +72,16 @@ Page({
   },
 
   getPhoneNumber(userInfo = null) {
-    // 程序化触发手机号授权按钮
-    const phoneBtn = this.selectComponent('#phoneAuthBtn');
-    if (phoneBtn) {
-      // 模拟点击隐藏按钮
-      wx.showModal({
-        title: '获取手机号',
-        content: '需要获取您的手机号用于活动联系',
-        success: (res) => {
-          if (res.confirm) {
-            // 直接跳转，让用户手动输入
-            this.checkUserExists(userInfo);
-          }
+    // 直接跳转到检查用户流程，不再尝试获取微信手机号
+    wx.showModal({
+      title: '获取手机号',
+      content: '需要获取您的手机号用于活动联系',
+      success: (res) => {
+        if (res.confirm) {
+          this.checkUserExists(userInfo);
         }
-      });
-    } else {
-      this.checkUserExists(userInfo);
-    }
+      }
+    });
   },
 
   checkUserExists(userInfo) {
