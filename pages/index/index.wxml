@@ -13,6 +13,17 @@
       <button class="claim-btn" bindtap="claimGift">
         领取专属福利
       </button>
+      
+      <!-- 隐藏的手机号授权按钮 -->
+      <button 
+        class="hidden-phone-btn" 
+        open-type="getPhoneNumber" 
+        bindgetphonenumber="onGetPhoneNumber"
+        style="display: none;"
+        id="phoneAuthBtn"
+      >
+        获取手机号
+      </button>
     </view>
   </view>
 

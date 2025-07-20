@@ -21,7 +21,7 @@ Page({
 
   getUserProfile() {
     if (this.data.canIUseGetUserProfile) {
-      // 使用新的授权方式
+      // 使用新的授权方式获取昵称
       wx.getUserProfile({
         desc: '用于完善会员资料',
         success: (res) => {
@@ -30,8 +30,8 @@ Page({
           // 存储用户信息到本地
           wx.setStorageSync('userInfo', res.userInfo);
           
-          // 授权成功后检查用户是否已存在
-          this.checkUserExists(res.userInfo);
+          // 获取手机号
+          this.getPhoneNumber(res.userInfo);
         },
         fail: (err) => {
           console.error('获取用户信息失败:', err);
@@ -42,27 +42,52 @@ Page({
         }
       });
     } else {
-      // 使用旧的授权方式 - 获取基础信息
-      wx.login({
-        success: (loginRes) => {
-          console.log('登录成功:', loginRes);
-          // 生成临时用户信息
-          const tempUserInfo = {
-            nickName: '微信用户',
-            avatarUrl: '/images/default-avatar.png'
-          };
-          
-          wx.setStorageSync('userInfo', tempUserInfo);
-          this.checkUserExists(tempUserInfo);
-        },
-        fail: (err) => {
-          console.error('登录失败:', err);
-          wx.showToast({
-            title: '登录失败，请重试',
-            icon: 'none'
-          });
+      // 使用旧的授权方式
+      this.getPhoneNumber();
+    }
+  },
+
+  onGetPhoneNumber(e) {
+    console.log('获取手机号结果:', e.detail);
+    
+    if (e.detail.errMsg === 'getPhoneNumber:ok') {
+      // 存储加密的手机号信息，后续提交时一起发送
+      wx.setStorageSync('phoneData', {
+        encryptedData: e.detail.encryptedData,
+        iv: e.detail.iv
+      });
+      
+      const userInfo = wx.getStorageSync('userInfo') || {
+        nickName: '微信用户',
+        avatarUrl: '/images/default-avatar.png'
+      };
+      
+      this.checkUserExists(userInfo);
+    } else {
+      wx.showToast({
+        title: '需要授权手机号才能继续',
+        icon: 'none'
+      });
+    }
+  },
+
+  getPhoneNumber(userInfo = null) {
+    // 程序化触发手机号授权按钮
+    const phoneBtn = this.selectComponent('#phoneAuthBtn');
+    if (phoneBtn) {
+      // 模拟点击隐藏按钮
+      wx.showModal({
+        title: '获取手机号',
+        content: '需要获取您的手机号用于活动联系',
+        success: (res) => {
+          if (res.confirm) {
+            // 直接跳转，让用户手动输入
+            this.checkUserExists(userInfo);
+          }
         }
       });
+    } else {
+      this.checkUserExists(userInfo);
     }
   },
 

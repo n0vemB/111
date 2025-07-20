@@ -1,13 +1,64 @@
 Page({
   data: {
     userInfo: null,
-    phoneError: ''
+    phoneError: '',
+    phoneNumber: ''
   },
 
   onLoad(options) {
     if (options.userInfo) {
       this.setData({
         userInfo: JSON.parse(options.userInfo)
+      });
+    }
+  },
+
+  onGetPhoneNumber(e) {
+    console.log('获取手机号结果:', e.detail);
+    
+    if (e.detail.errMsg === 'getPhoneNumber:ok') {
+      // 需要发送到后端解密获取真实手机号
+      wx.showLoading({
+        title: '获取中...'
+      });
+      
+      wx.request({
+        url: 'https://bk-lilac.vercel.app/api/decrypt-phone',
+        method: 'POST',
+        data: {
+          encryptedData: e.detail.encryptedData,
+          iv: e.detail.iv,
+          sessionKey: wx.getStorageSync('session_key') // 需要先获取session_key
+        },
+        success: (res) => {
+          wx.hideLoading();
+          if (res.data.success) {
+            this.setData({
+              phoneNumber: res.data.phoneNumber
+            });
+            wx.showToast({
+              title: '获取成功',
+              icon: 'success'
+            });
+          } else {
+            wx.showToast({
+              title: '获取失败，请手动输入',
+              icon: 'none'
+            });
+          }
+        },
+        fail: () => {
+          wx.hideLoading();
+          wx.showToast({
+            title: '获取失败，请手动输入',
+            icon: 'none'
+          });
+        }
+      });
+    } else {
+      wx.showToast({
+        title: '需要授权手机号',
+        icon: 'none'
       });
     }
   },
@@ -21,6 +72,7 @@ Page({
     }
     
     this.setData({
+      phoneNumber: phone,
       phoneError
     });
   },
@@ -28,8 +80,11 @@ Page({
   handleSubmit(e) {
     const formData = e.detail.value;
     
+    // 使用页面数据中的手机号
+    const phone = this.data.phoneNumber || formData.phone;
+    
     // 验证必填字段
-    if (!formData.referrer || !formData.dingName || !formData.phone) {
+    if (!formData.referrer || !formData.dingName || !phone) {
       wx.showToast({
         title: '请填写完整信息',
         icon: 'none'
@@ -39,7 +94,7 @@ Page({
 
     // 验证手机号格式
     const phoneRegex = /^1[3-9]\d{9}$/;
-    if (!phoneRegex.test(formData.phone)) {
+    if (!phoneRegex.test(phone)) {
       wx.showToast({
         title: '请输入正确的手机号码',
         icon: 'none'
@@ -64,6 +119,7 @@ Page({
 
     const submitData = {
       ...formData,
+      phone: phone, // 使用获取到的手机号
       userInfo: this.data.userInfo,
       openid: openid,
       createTime: new Date().toISOString()
