@@ -1,0 +1,22 @@
+<view class="success-container">
+  <view class="success-animation">
+    <text class="success-icon">✅</text>
+  </view>
+  
+  <text class="success-title">领取成功！</text>
+  <text class="success-desc">恭喜您成功领取专属福利\n我们将在3个工作日内联系您</text>
+  
+  <button class="back-btn" bindtap="backHome">返回首页</button>
+  
+  <view class="celebration">
+    <view class="confetti" style="left: 10%; animation-delay: 0s;"></view>
+    <view class="confetti" style="left: 20%; animation-delay: 0.5s;"></view>
+    <view class="confetti" style="left: 30%; animation-delay: 1s;"></view>
+    <view class="confetti" style="left: 40%; animation-delay: 1.5s;"></view>
+    <view class="confetti" style="left: 50%; animation-delay: 2s;"></view>
+    <view class="confetti" style="left: 60%; animation-delay: 0.3s;"></view>
+    <view class="confetti" style="left: 70%; animation-delay: 0.8s;"></view>
+    <view class="confetti" style="left: 80%; animation-delay: 1.3s;"></view>
+    <view class="confetti" style="left: 90%; animation-delay: 1.8s;"></view>
+  </view>
+</view>

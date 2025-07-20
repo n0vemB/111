@@ -1,0 +1,27 @@
+<view class="container">
+  <image class="bg-image" src="/images/bg.jpg" mode="aspectFill"></image>
+  
+  <view class="content">
+    <text class="title">100元体验金</text>
+    <text class="subtitle">限时活动，仅限新用户\n完成信息填写即可领取</text>
+    
+    <button class="claim-btn" bindtap="handleClaim" open-type="getUserProfile">
+      立即领取
+    </button>
+  </view>
+  
+  <view class="features">
+    <view class="feature-item">
+      <text>🎁</text>
+      <text>专属福利</text>
+    </view>
+    <view class="feature-item">
+      <text>⚡</text>
+      <text>即时到账</text>
+    </view>
+    <view class="feature-item">
+      <text>🔒</text>
+      <text>信息安全</text>
+    </view>
+  </view>
+</view>
