@@ -2,8 +2,20 @@
   "version": 2,
   "rewrites": [
     {
-      "source": "/(.*)",
-      "destination": "/api/index.js"
+      "source": "/api/admin/users",
+      "destination": "/api/users"
+    },
+    {
+      "source": "/api/check-user",
+      "destination": "/api/users"
+    },
+    {
+      "source": "/api/submit",
+      "destination": "/api/users"
+    },
+    {
+      "source": "/api",
+      "destination": "/api/hello"
     }
   ]
 }
