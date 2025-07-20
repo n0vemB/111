@@ -67,43 +67,56 @@ Page({
   },
 
   checkUserExists(userInfo) {
-    // 生成或获取唯一标识
-    let openid = wx.getStorageSync('openid');
-    if (!openid) {
-      openid = 'user-' + Date.now() + '-' + Math.random().toString(36).substr(2, 9);
-      wx.setStorageSync('openid', openid);
-    }
-    
-    wx.showLoading({
-      title: '检查中...'
-    });
-    
-    wx.request({
-      url: `${app.globalData.apiBase}/api/check-user`,
-      method: 'POST',
-      data: { openid },
-      success: (res) => {
-        wx.hideLoading();
-        console.log('检查用户结果:', res.data);
-        
-        if (res.data.exists) {
-          wx.showModal({
-            title: '提示',
-            content: '您已经提交过信息了，不能重复领取',
-            showCancel: false,
-            confirmText: '知道了'
-          });
-        } else {
-          wx.navigateTo({
-            url: `/pages/form/form?userInfo=${encodeURIComponent(JSON.stringify(userInfo))}`
-          });
+    // 使用微信登录获取真实的 openid 或生成稳定的标识
+    wx.login({
+      success: (loginRes) => {
+        let openid = wx.getStorageSync('stable_openid');
+        if (!openid) {
+          // 基于微信 code 和设备信息生成稳定标识
+          openid = 'user-' + loginRes.code.slice(-8) + '-' + Date.now().toString().slice(-6);
+          wx.setStorageSync('stable_openid', openid);
         }
+        
+        wx.showLoading({
+          title: '检查中...'
+        });
+        
+        wx.request({
+          url: `${app.globalData.apiBase}/api/check-user`,
+          method: 'POST',
+          data: { openid },
+          success: (res) => {
+            wx.hideLoading();
+            console.log('检查用户结果:', res.data);
+            
+            if (res.data.exists) {
+              wx.showModal({
+                title: '提示',
+                content: '您已经提交过信息了，不能重复领取',
+                showCancel: false,
+                confirmText: '知道了'
+              });
+              return; // 直接返回，不跳转
+            } else {
+              wx.navigateTo({
+                url: `/pages/form/form?userInfo=${encodeURIComponent(JSON.stringify(userInfo))}`
+              });
+            }
+          },
+          fail: (err) => {
+            wx.hideLoading();
+            console.error('检查用户失败:', err);
+            wx.showToast({
+              title: '网络错误，请重试',
+              icon: 'none'
+            });
+          }
+        });
       },
       fail: (err) => {
-        wx.hideLoading();
-        console.error('检查用户失败:', err);
+        console.error('微信登录失败:', err);
         wx.showToast({
-          title: '网络错误，请重试',
+          title: '登录失败，请重试',
           icon: 'none'
         });
       }

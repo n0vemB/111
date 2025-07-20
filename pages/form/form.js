@@ -48,7 +48,7 @@ Page({
     }
 
     // 获取 openid
-    const openid = wx.getStorageSync('openid');
+    const openid = wx.getStorageSync('stable_openid');
     if (!openid) {
       wx.showToast({
         title: '用户信息异常，请重新进入',
