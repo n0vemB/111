@@ -2,13 +2,13 @@
   "version": 2,
   "functions": {
     "api/index.js": {
-      "runtime": "nodejs18.x"
+      "runtime": "@vercel/node@20.x"
     }
   },
   "rewrites": [
     {
       "source": "/admin",
-      "destination": "/public/admin.html"
+      "destination": "/api/index.js?url=/admin"
     },
     {
       "source": "/api/admin/users",
