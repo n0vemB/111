@@ -3,23 +3,23 @@
   "rewrites": [
     {
       "source": "/admin",
-      "destination": "/api/index?url=/api/admin"
+      "destination": "/api?url=/api/admin"
     },
     {
       "source": "/api/admin/users",
-      "destination": "/api/index?url=/api/admin/users"
+      "destination": "/api?url=/api/admin/users"
     },
     {
       "source": "/api/check-user",
-      "destination": "/api/index?url=/api/check-user"
+      "destination": "/api?url=/api/check-user"
     },
     {
       "source": "/api/submit",
-      "destination": "/api/index?url=/api/submit"
+      "destination": "/api?url=/api/submit"
     },
     {
       "source": "/api/admin/user/(.*)",
-      "destination": "/api/index?url=/api/admin/user/$1"
+      "destination": "/api?url=/api/admin/user/$1"
     }
   ]
 }
