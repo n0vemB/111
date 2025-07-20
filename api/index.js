@@ -1,5 +1,5 @@
-// 内存存储（注意：重启后会丢失）
-let users = [];
+// 使用全局变量模拟共享存储（临时解决方案）
+global.users = global.users || [];
 
 export default function handler(req, res) {
   // 设置 CORS
@@ -12,10 +12,9 @@ export default function handler(req, res) {
   }
 
   const { method } = req;
-  // 从查询参数获取实际路径，如果没有则使用原始 URL
   const url = req.query.url || req.url;
   
-  console.log('API Request:', { method, url, originalUrl: req.url, query: req.query });
+  console.log('API Request:', { method, url, usersCount: global.users.length });
 
   try {
     // 根路径
@@ -23,28 +22,28 @@ export default function handler(req, res) {
       return res.json({ 
         message: 'API is working', 
         timestamp: new Date().toISOString(),
-        users: users.length 
+        users: global.users.length 
       });
     }
 
     // 管理员查看用户
     if (method === 'GET' && url === '/api/admin/users') {
-      return res.json({ users });
+      return res.json({ users: global.users });
     }
 
     // 检查用户是否存在
     if (method === 'POST' && url === '/api/check-user') {
       const { openid } = req.body || {};
-      const exists = users.some(user => user.openid === openid);
+      const exists = global.users.some(user => user.openid === openid);
       return res.json({ exists });
     }
 
     // 提交用户信息
     if (method === 'POST' && url === '/api/submit') {
       const userData = req.body || {};
-      users.push({
+      global.users.push({
         ...userData,
-        id: users.length + 1,
+        id: global.users.length + 1,
         submitTime: new Date().toISOString()
       });
       return res.json({ success: true });
@@ -53,7 +52,7 @@ export default function handler(req, res) {
     // 删除用户
     if (method === 'DELETE' && url.startsWith('/api/admin/user/')) {
       const openid = url.split('/').pop();
-      const userIndex = users.findIndex(user => user.openid === openid);
+      const userIndex = global.users.findIndex(user => user.openid === openid);
       
       if (userIndex === -1) {
         return res.status(404).json({ 
@@ -62,7 +61,7 @@ export default function handler(req, res) {
         });
       }
       
-      const deletedUser = users.splice(userIndex, 1)[0];
+      const deletedUser = global.users.splice(userIndex, 1)[0];
       return res.json({ 
         success: true, 
         message: '用户已删除'
@@ -124,14 +123,12 @@ export default function handler(req, res) {
       `);
     }
 
-    // 404 - 显示调试信息
+    // 404
     return res.status(404).json({ 
       error: 'Not Found', 
       path: url,
-      originalUrl: req.url,
       method: method,
-      query: req.query,
-      debug: 'Check the URL path and method'
+      debug: 'Available endpoints: /api, /api/admin/users, /api/check-user, /api/submit, /api/admin'
     });
 
   } catch (error) {
