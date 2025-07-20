@@ -34,6 +34,9 @@ export default function handler(req, res) {
     // 检查用户是否存在
     if (method === 'POST' && url === '/api/check-user') {
       const { openid } = req.body || {};
+      if (!openid) {
+        return res.status(400).json({ error: '缺少 openid 参数' });
+      }
       const exists = global.users.some(user => user.openid === openid);
       return res.json({ exists });
     }
@@ -41,6 +44,43 @@ export default function handler(req, res) {
     // 提交用户信息
     if (method === 'POST' && url === '/api/submit') {
       const userData = req.body || {};
+      const { openid, phone, referrer, dingName } = userData;
+      
+      // 验证必填字段
+      if (!openid || !phone || !referrer || !dingName) {
+        return res.status(400).json({ 
+          success: false, 
+          message: '请填写完整信息' 
+        });
+      }
+      
+      // 验证手机号格式
+      const phoneRegex = /^1[3-9]\d{9}$/;
+      if (!phoneRegex.test(phone)) {
+        return res.status(400).json({ 
+          success: false, 
+          message: '请输入正确的手机号码' 
+        });
+      }
+      
+      // 检查用户是否已存在
+      const exists = global.users.some(user => user.openid === openid);
+      if (exists) {
+        return res.status(400).json({ 
+          success: false, 
+          message: '您已经提交过信息了' 
+        });
+      }
+      
+      // 检查手机号是否已被使用
+      const phoneExists = global.users.some(user => user.phone === phone);
+      if (phoneExists) {
+        return res.status(400).json({ 
+          success: false, 
+          message: '该手机号已被使用' 
+        });
+      }
+      
       global.users.push({
         ...userData,
         id: global.users.length + 1,
