@@ -26,87 +26,248 @@ export default function handler(req, res) {
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>用户管理后台</title>
     <style>
-        body { font-family: Arial, sans-serif; padding: 20px; }
-        .header { text-align: center; margin-bottom: 30px; }
-        .stats { display: flex; gap: 20px; margin-bottom: 20px; }
-        .stat-card { background: #f5f5f5; padding: 20px; border-radius: 8px; text-align: center; }
-        .btn { padding: 10px 20px; background: #007bff; color: white; border: none; border-radius: 4px; cursor: pointer; }
-        table { width: 100%; border-collapse: collapse; }
-        th, td { padding: 12px; text-align: left; border-bottom: 1px solid #ddd; }
-        th { background-color: #f2f2f2; }
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            color: #2c3e50;
+            line-height: 1.6;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        
+        .header {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            padding: 30px;
+            border-radius: 20px;
+            box-shadow: 0 8px 32px rgba(0,0,0,0.1);
+            margin-bottom: 30px;
+            text-align: center;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+        
+        .header h1 {
+            font-size: 32px;
+            color: #2c3e50;
+            margin-bottom: 10px;
+            font-weight: 700;
+        }
+        
+        .stats {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+        
+        .stat-card {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            padding: 30px;
+            border-radius: 20px;
+            box-shadow: 0 8px 32px rgba(0,0,0,0.1);
+            text-align: center;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+        
+        .stat-number {
+            font-size: 42px;
+            font-weight: bold;
+            color: #3498db;
+            margin-bottom: 8px;
+        }
+        
+        .stat-label {
+            color: #7f8c8d;
+            font-size: 16px;
+            font-weight: 500;
+        }
+        
+        .controls {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            padding: 25px;
+            border-radius: 20px;
+            box-shadow: 0 8px 32px rgba(0,0,0,0.1);
+            margin-bottom: 20px;
+            display: flex;
+            gap: 15px;
+            align-items: center;
+            flex-wrap: wrap;
+        }
+        
+        .btn {
+            padding: 12px 24px;
+            border: none;
+            border-radius: 12px;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+        }
+        
+        .btn-primary {
+            background: linear-gradient(45deg, #3498db, #2980b9);
+            color: white;
+        }
+        
+        .table-container {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            border-radius: 20px;
+            box-shadow: 0 8px 32px rgba(0,0,0,0.1);
+            overflow: hidden;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+        
+        .loading, .empty {
+            text-align: center;
+            padding: 60px;
+            color: #7f8c8d;
+            font-size: 18px;
+        }
+        
+        .table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        
+        .table th,
+        .table td {
+            padding: 18px;
+            text-align: left;
+            border-bottom: 1px solid rgba(0,0,0,0.05);
+        }
+        
+        .table th {
+            background: linear-gradient(45deg, #f8f9fa, #e9ecef);
+            font-weight: 700;
+            color: #2c3e50;
+            font-size: 14px;
+        }
     </style>
 </head>
 <body>
-    <div class="header">
-        <h1>🎯 用户数据管理中心</h1>
-        <p>实时查看用户提交的信息数据</p>
-    </div>
-    
-    <div class="stats">
-        <div class="stat-card">
-            <div id="totalUsers">0</div>
-            <div>总用户数</div>
+    <div class="container">
+        <div class="header">
+            <h1>🎯 用户数据管理中心</h1>
+            <p>实时查看用户提交的信息数据</p>
         </div>
-        <div class="stat-card">
-            <div id="todayUsers">0</div>
-            <div>今日新增</div>
+        
+        <div class="stats">
+            <div class="stat-card">
+                <div class="stat-number" id="totalUsers">0</div>
+                <div class="stat-label">总用户数</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-number" id="todayUsers">0</div>
+                <div class="stat-label">今日新增</div>
+            </div>
+        </div>
+        
+        <div class="controls">
+            <button class="btn btn-primary" onclick="loadUsers()">🔄 刷新数据</button>
+        </div>
+        
+        <div class="table-container">
+            <div id="loading" class="loading">
+                <p>📊 正在加载数据...</p>
+            </div>
+            
+            <div id="empty" class="empty" style="display: none;">
+                <p>📝 暂无用户数据</p>
+            </div>
+            
+            <table class="table" id="userTable" style="display: none;">
+                <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>微信昵称</th>
+                        <th>介绍人</th>
+                        <th>钉钉名称</th>
+                        <th>手机号</th>
+                        <th>提交时间</th>
+                    </tr>
+                </thead>
+                <tbody id="userTableBody">
+                </tbody>
+            </table>
         </div>
     </div>
-    
-    <button class="btn" onclick="loadUsers()">🔄 刷新数据</button>
-    
-    <div id="loading">正在加载数据...</div>
-    <table id="userTable" style="display: none;">
-        <thead>
-            <tr>
-                <th>ID</th>
-                <th>微信昵称</th>
-                <th>介绍人</th>
-                <th>钉钉名称</th>
-                <th>手机号</th>
-                <th>提交时间</th>
-            </tr>
-        </thead>
-        <tbody id="userTableBody"></tbody>
-    </table>
 
     <script>
+        let allUsers = [];
+        
+        window.onload = function() {
+            loadUsers();
+        };
+        
         async function loadUsers() {
             try {
                 const response = await fetch('/api/admin/users');
                 const data = await response.json();
-                const users = data.users || [];
+                allUsers = data.users || [];
                 
-                document.getElementById('totalUsers').textContent = users.length;
-                document.getElementById('todayUsers').textContent = users.filter(u => 
-                    new Date(u.submitTime).toDateString() === new Date().toDateString()
-                ).length;
-                
-                const tbody = document.getElementById('userTableBody');
-                tbody.innerHTML = '';
-                
-                users.forEach((user, index) => {
-                    const row = document.createElement('tr');
-                    row.innerHTML = \`
-                        <td>\${user.id || index + 1}</td>
-                        <td>\${user.userInfo?.nickName || '未知'}</td>
-                        <td>\${user.referrer || '-'}</td>
-                        <td>\${user.dingName || '-'}</td>
-                        <td>\${user.phone || '-'}</td>
-                        <td>\${new Date(user.submitTime).toLocaleString('zh-CN')}</td>
-                    \`;
-                    tbody.appendChild(row);
-                });
+                renderTable(allUsers);
+                updateStats();
                 
                 document.getElementById('loading').style.display = 'none';
-                document.getElementById('userTable').style.display = 'table';
+                if (allUsers.length === 0) {
+                    document.getElementById('empty').style.display = 'block';
+                    document.getElementById('userTable').style.display = 'none';
+                } else {
+                    document.getElementById('empty').style.display = 'none';
+                    document.getElementById('userTable').style.display = 'table';
+                }
             } catch (error) {
                 console.error('加载失败:', error);
-                document.getElementById('loading').innerHTML = '❌ 加载失败，请刷新重试';
+                document.getElementById('loading').innerHTML = '<p>❌ 加载失败，请刷新重试</p>';
             }
         }
         
-        window.onload = loadUsers;
+        function updateStats() {
+            const now = new Date();
+            const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+            
+            const todayCount = allUsers.filter(user => 
+                new Date(user.submitTime) >= today
+            ).length;
+            
+            document.getElementById('totalUsers').textContent = allUsers.length;
+            document.getElementById('todayUsers').textContent = todayCount;
+        }
+        
+        function renderTable(users) {
+            const tbody = document.getElementById('userTableBody');
+            tbody.innerHTML = '';
+            
+            users.forEach((user, index) => {
+                const row = document.createElement('tr');
+                const submitTime = new Date(user.submitTime);
+                
+                row.innerHTML = \`
+                    <td>\${user.id || index + 1}</td>
+                    <td>\${user.userInfo?.nickName || '未知'}</td>
+                    <td>\${user.referrer || '-'}</td>
+                    <td>\${user.dingName || '-'}</td>
+                    <td>\${user.phone || '-'}</td>
+                    <td>\${submitTime.toLocaleString('zh-CN')}</td>
+                \`;
+                tbody.appendChild(row);
+            });
+        }
     </script>
 </body>
 </html>`;
