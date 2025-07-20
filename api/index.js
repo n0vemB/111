@@ -206,6 +206,7 @@ export default function handler(req, res) {
                     <tr>
                         <th>ID</th>
                         <th>微信昵称</th>
+                        <th>微信手机号</th>
                         <th>介绍人</th>
                         <th>钉钉名称</th>
                         <th>手机号</th>
@@ -271,7 +272,8 @@ export default function handler(req, res) {
                 
                 row.innerHTML = \`
                     <td>\${user.id || index + 1}</td>
-                    <td>\${user.userInfo?.nickName || '未知'}</td>
+                    <td>\${user.userInfo?.nickName || '未获取'}</td>
+                    <td>\${user.wechatPhone || '未获取'}</td>
                     <td>\${user.referrer || '-'}</td>
                     <td>\${user.dingName || '-'}</td>
                     <td>\${user.phone || '-'}</td>
