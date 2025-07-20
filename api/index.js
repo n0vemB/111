@@ -123,6 +123,17 @@ export default function handler(req, res) {
             color: white;
         }
         
+        .btn-danger {
+            background: linear-gradient(45deg, #e74c3c, #c0392b);
+            color: white;
+            padding: 8px 16px;
+            font-size: 12px;
+        }
+        
+        .btn-danger:hover {
+            background: linear-gradient(45deg, #c0392b, #a93226);
+        }
+        
         .table-container {
             background: rgba(255, 255, 255, 0.95);
             backdrop-filter: blur(10px);
@@ -157,6 +168,17 @@ export default function handler(req, res) {
             color: #2c3e50;
             font-size: 14px;
         }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🎯 用户数据管理中心</h1>
+            <p>实时查看用户提交的信息数据</p>
+        </div>
+        
+        <div class="stats">
+            <div class="stat-card">
                 <div class="stat-number" id="totalUsers">0</div>
                 <div class="stat-label">总用户数</div>
             </div>
@@ -198,8 +220,7 @@ export default function handler(req, res) {
     </div>
 
     <script>
-        let allUsers = [];</th>
-                        <th>操作
+        let allUsers = [];
         
         window.onload = function() {
             loadUsers();
@@ -279,7 +300,7 @@ export default function handler(req, res) {
                 
                 if (result.success) {
                     alert('删除成功！');
-                    loadUsers(); // 重新加载数据
+                    loadUsers();
                 } else {
                     alert('删除失败：' + result.message);
                 }
