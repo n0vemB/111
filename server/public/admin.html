@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>用户数据管理</title>
+    <title>用户管理后台</title>
     <style>
         * {
             margin: 0;
@@ -295,25 +295,18 @@
         // 加载用户数据
         async function loadUsers() {
             try {
-                const response = await fetch('/admin/users');
+                const response = await fetch('/api/admin/users');
                 const data = await response.json();
                 allUsers = data.users || [];
                 
-                updateStats();
                 renderTable(allUsers);
+                updateStats();
                 
-                document.getElementById('loading').style.display = 'none';
-                
-                if (allUsers.length === 0) {
-                    document.getElementById('empty').style.display = 'block';
-                    document.getElementById('userTable').style.display = 'none';
-                } else {
-                    document.getElementById('empty').style.display = 'none';
-                    document.getElementById('userTable').style.display = 'table';
-                }
+                document.getElementById('userTable').style.display = 'table';
+                document.getElementById('noData').style.display = 'none';
             } catch (error) {
-                console.error('加载数据失败:', error);
-                document.getElementById('loading').innerHTML = '<p style="color: #e74c3c;">❌ 加载数据失败，请检查服务器连接</p>';
+                console.error('加载失败:', error);
+                document.getElementById('noData').style.display = 'block';
             }
         }
         
@@ -398,21 +391,16 @@
             }
             
             try {
-                const response = await fetch(`/admin/user/${encodeURIComponent(openid)}`, {
+                const response = await fetch(`/api/admin/user/${encodeURIComponent(openid)}`, {
                     method: 'DELETE'
                 });
                 
                 const result = await response.json();
                 
                 if (result.success) {
-                    // 从本地数组中移除
                     allUsers.splice(index, 1);
-                    // 重新渲染表格
                     renderTable(allUsers);
-                    // 更新统计
                     updateStats();
-                    
-                    // 显示成功消息
                     showMessage('✅ 删除成功', 'success');
                 } else {
                     showMessage('❌ 删除失败: ' + result.message, 'error');

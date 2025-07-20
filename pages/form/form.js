@@ -14,7 +14,6 @@ Page({
   handleSubmit(e) {
     const formData = e.detail.value;
     
-    // 表单验证
     if (!formData.referrer || !formData.dingName || !formData.phone) {
       wx.showToast({
         title: '请填写完整信息',
@@ -23,14 +22,13 @@ Page({
       return;
     }
 
-    // 提交数据
     wx.request({
-      url: 'http://localhost:3000/submit', // 修改为本地地址
+      url: 'https://bk-lilac.vercel.app/api/submit',
       method: 'POST',
       data: {
         ...formData,
         userInfo: this.data.userInfo,
-        openid: wx.getStorageSync('openid') || 'test-openid-123',
+        openid: wx.getStorageSync('openid') || 'test-openid-' + Date.now(),
         createTime: new Date().toISOString()
       },
       success: () => {

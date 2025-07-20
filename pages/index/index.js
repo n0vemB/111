@@ -5,7 +5,6 @@ Page({
       success: (res) => {
         const userInfo = res.userInfo;
         
-        // 检查用户是否已领取
         this.checkUserExists(userInfo).then(exists => {
           if (exists) {
             wx.showToast({
@@ -13,7 +12,6 @@ Page({
               icon: 'none'
             });
           } else {
-            // 跳转到填写页面
             wx.navigateTo({
               url: `/pages/form/form?userInfo=${JSON.stringify(userInfo)}`
             });
@@ -32,10 +30,10 @@ Page({
   checkUserExists(userInfo) {
     return new Promise((resolve) => {
       wx.request({
-        url: 'http://localhost:3000/check-user', // 修改为本地地址
+        url: 'https://bk-lilac.vercel.app/api/check-user',
         method: 'POST',
         data: {
-          openid: wx.getStorageSync('openid') || 'test-openid-123',
+          openid: wx.getStorageSync('openid') || 'test-openid-' + Date.now(),
           nickName: userInfo.nickName
         },
         success: (res) => {
